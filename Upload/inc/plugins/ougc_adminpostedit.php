@@ -348,6 +348,16 @@ if(use_xmlhttprequest == "1")
 			'silent'		=> ''
 		);
 
+		if(!($time_zone = (int)$mybb->user['timezone']))
+		{
+			$time_zone = (int)$mybb->settings['timezoneoffset'];
+		}
+
+		if($time_zone)
+		{
+			$p['dateline'] = $p['dateline']-($time_zone*60*60);
+		}
+
 		if($mybb->request_method == 'post')
 		{
 			$post_update_data = array();
@@ -377,6 +387,7 @@ if(use_xmlhttprequest == "1")
 			}
 
 			$date = gmmktime((int)$date[0], (int)$date[1], 0, $input['month'], $input['day'], $input['year']);
+
 			if(!(!checkdate($input['month'], $input['day'], $input['year']) || $date < 0 || $date == false))
 			{
 				$p['dateline'] = $post_update_data['dateline'] = (int)$date;
