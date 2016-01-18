@@ -219,6 +219,15 @@ if(use_xmlhttprequest == "1")
 </tr>',
 		));
 
+		$PL->settings('ougc_adminpostedit', $lang->setting_group_ougc_adminpostedit, $lang->setting_group_ougc_adminpostedit_desc, array(
+			'groups'			=> array(
+				'title'			=> $lang->setting_ougc_adminpostedit_groups,
+				'description'	=> $lang->setting_ougc_adminpostedit_groups_desc,
+				'optionscode'	=> 'groupselect',
+				'value'			=> 4
+			),
+		));
+
 		require_once MYBB_ROOT.'inc/adminfunctions_templates.php';
 		find_replace_templatesets('editpost', '#'.preg_quote('{$pollbox}').'#i', '{$pollbox}{$ougc_adminpostedit}');
 
@@ -269,6 +278,7 @@ if(use_xmlhttprequest == "1")
 
 		// Delete settings
 		$PL->templates_delete('ougc_adminpostedit');
+		$PL->settings_delete('ougc_adminpostedit');
 
 		// Delete version from cache
 		$plugins = (array)$cache->read('ougc_plugins');
@@ -293,7 +303,7 @@ if(use_xmlhttprequest == "1")
 	{
 		global $lang;
 
-		isset($lang->setting_group_ougc_adminpostedit) or $lang->load('ougc_adminpostedit', true);
+		isset($lang->setting_group_ougc_adminpostedit) or $lang->load('ougc_adminpostedit');
 	}
 
 	// Build plugin info
@@ -330,16 +340,16 @@ if(use_xmlhttprequest == "1")
 	// Hook: editpost_end/datahandler_post_update
 	function hook_editpost_end(&$dh)
 	{
-		global $fid, $ougc_adminpostedit;
+		global $fid, $ougc_adminpostedit, $mybb;
 
 		$ougc_adminpostedit = '';
 
-		if(!is_moderator($fid, 'caneditposts'))
+		if(!is_moderator($fid, 'caneditposts') || !is_member($mybb->settings['ougc_adminpostedit_groups']))
 		{
 			return;
 		}
 
-		global $lang, $mybb, $templates, $pid, $db;
+		global $lang, $templates, $pid, $db;
 
 		$this->load_language();
 
