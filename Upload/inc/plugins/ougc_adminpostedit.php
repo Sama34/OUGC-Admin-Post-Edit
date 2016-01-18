@@ -33,6 +33,19 @@ defined('IN_MYBB') or die('Direct initialization of this file is not allowed.');
 // PLUGINLIBRARY
 defined('PLUGINLIBRARY') or define('PLUGINLIBRARY', MYBB_ROOT.'inc/plugins/pluginlibrary.php');
 
+// Cache template
+if(THIS_SCRIPT == 'editpost.php')
+{
+	global $templatelist;
+
+	if(!isset($templatelist))
+	{
+		$templatelist = '';
+	}
+
+	$templatelist .= ',ougcadminpostedit';
+}
+
 // Plugin API
 function ougc_adminpostedit_info()
 {
