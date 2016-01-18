@@ -4,7 +4,7 @@
  *
  *	OUGC Admin Post Edit plugin (/inc/languages/english/admin/ougc_adminpostedit.lang.php)
  *	Author: Omar Gonzalez
- *	Copyright: © 2015 Omar Gonzalez
+ *	Copyright: © 2015 - 2016 Omar Gonzalez
  *
  *	Website: http://omarg.me
  *

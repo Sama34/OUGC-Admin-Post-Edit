@@ -4,7 +4,7 @@
  *
  *	OUGC Admin Post Edit plugin (/inc/plugins/ougc_adminpostedit.php)
  *	Author: Omar Gonzalez
- *	Copyright: © 2015 Omar Gonzalez
+ *	Copyright: © 2015 - 2016 Omar Gonzalez
  *
  *	Website: http://omarg.me
  *
@@ -73,6 +73,9 @@ function ougc_adminpostedit_is_installed()
 // _uninstall() routine
 function ougc_adminpostedit_uninstall()
 {
+	global $adminpostedit;
+
+	return $adminpostedit->_uninstall();
 }
 
 // Plugin class
@@ -125,32 +128,21 @@ class ougc_adminpostedit
 		global $PL, $lang, $mybb;
 		$this->load_pluginlibrary();
 
-		$PL->templates('ougcadminpostedit', '<lang:setting_group_ougc_adminpostedit>', array(
+		$PL->templates('ougcadminpostedit', 'OUGC Admin Post Edit', array(
 			''	=> '<tr>
 <td class="tcat" colspan="2"><strong>{$lang->ougc_adminpostedit_post}</strong></td>
 </tr>
 <tr>
 <td class="trow2" valign="top"><strong>{$lang->ougc_adminpostedit_post_time}</strong></td>
 <td class="trow2">
-	<select name="ougc_adminpostedit[day]">
-		{$startdateday}
-	</select>
-	&nbsp;
-	<select name="ougc_adminpostedit[month]">
-		{$startdatemonth}
-	</select>
-	&nbsp;
-	<input type="text" name="ougc_adminpostedit[year]" value="{$startdateyear}" size="4" maxlength="4" class="textbox" />
-	- {$lang->ougc_adminpostedit_post_time} <input type="text" name="ougc_adminpostedit[time]" value="{$starttime_time}" size="10" class="textbox" />
+	<input type="text" class="textbox" name="ougc_adminpostedit[timestamp]" style="width: 8em;" value="{$timestamp}" size="14" maxlength="10" />
 </td>
 </tr>
 <tr>
 <td class="trow2" valign="top"><strong>{$lang->ougc_adminpostedit_post_author}</strong></td>
 <td class="trow2">
-	<div style="width: 28em;">
-		<input type="text" class="textbox" name="ougc_adminpostedit[username]" id="username" style="width: 28em;" value="{$search_username}" />
-	
-
+	<div style="width: 16em;">
+		<input type="text" class="textbox" name="ougc_adminpostedit[username]" id="username" style="width: 16em;" value="{$search_username}" size="28" />
 <link rel="stylesheet" href="{$mybb->asset_url}/jscripts/select2/select2.css">
 <script type="text/javascript" src="{$mybb->asset_url}/jscripts/select2/select2.min.js?ver=1804"></script>
 <script type="text/javascript">
@@ -206,10 +198,10 @@ if(use_xmlhttprequest == "1")
 </tr>
 <tr>
 <td class="trow2" valign="top"><strong>{$lang->ougc_adminpostedit_post_ip}</strong></td>
-<td class="trow2"><input type="text" class="textbox" name="ougc_adminpostedit[ip]" size="40" maxlength="20" value="{$p[\'ipaddress\']}" tabindex="9" /></td>
+<td class="trow2"><input type="text" class="textbox" name="ougc_adminpostedit[ipaddress]" style="width: 8em;" value="{$p[\'ipaddress\']}" size="14" maxlength="16" /></td>
 </tr>
 <tr>
-<td class="trow2" colspan="2"><span class="smalltext"><label><input type="checkbox" class="checkbox" name="ougc_adminpostedit[silent]" value="1" tabindex="10"{$p[\'silent\']} /> {$lang->ougc_adminpostedit_post_silentedit}</label></span>
+<td class="trow2" colspan="2"><span class="smalltext"><label><input type="checkbox" class="checkbox" name="ougc_adminpostedit[silent]" value="1" {$p[\'silent\']} /> {$lang->ougc_adminpostedit_post_silentedit}</label></span>
 </td>
 </tr>',
 		));
@@ -327,7 +319,7 @@ if(use_xmlhttprequest == "1")
 	{
 		global $fid, $ougc_adminpostedit;
 
-		$ougc_adminpostedit = 'asd';
+		$ougc_adminpostedit = '';
 
 		if(!is_moderator($fid, 'caneditposts'))
 		{
@@ -348,49 +340,23 @@ if(use_xmlhttprequest == "1")
 			'silent'		=> ''
 		);
 
-		if(!($time_zone = (int)$mybb->user['timezone']))
-		{
-			$time_zone = (int)$mybb->settings['timezoneoffset'];
-		}
+		$timestamp = (int)$p['dateline'];
 
-		if($time_zone)
-		{
-			$p['dateline'] = $p['dateline']-($time_zone*60*60);
-		}
+		$search_username = htmlspecialchars_uni(trim($p['username']));
 
 		if($mybb->request_method == 'post')
 		{
-			$post_update_data = array();
-
 			$input = $mybb->get_input('ougc_adminpostedit', 2);
 
-			$input['time'] = (string)$input['time'];
-			$date = explode(' ', $input['time']);
-			$date = explode(':', $date[0]);
+			$timestamp = (int)$input['timestamp'];
 
-			if(stristr($input['time'], 'pm'))
+			$search_username = htmlspecialchars_uni(trim($input['username']));
+
+			$post_update_data = array();
+
+			if($p['dateline'] != $input['timestamp'] && TIME_NOW >= $input['timestamp'])
 			{
-				$date[0] = 12+$date[0];
-				if($date[0] >= 24)
-				{
-					$date[0] = '00';
-				}
-			}
-
-			$input['month'] = (int)$input['month'];
-			$input['day'] = (int)$input['day'];
-			$input['year'] = (int)$input['year'];
-			$months = array('01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12');
-			if(!in_array($input['month'], $months))
-			{
-				$input['month'] = '01';
-			}
-
-			$date = gmmktime((int)$date[0], (int)$date[1], 0, $input['month'], $input['day'], $input['year']);
-
-			if(!(!checkdate($input['month'], $input['day'], $input['year']) || $date < 0 || $date == false))
-			{
-				$p['dateline'] = $post_update_data['dateline'] = (int)$date;
+				$p['dateline'] = $post_update_data['dateline'] = (int)$input['timestamp'];
 			}
 
 			if($p['username'] != $input['username'])
@@ -407,13 +373,13 @@ if(use_xmlhttprequest == "1")
 
 			if($p['ipaddress'] != $input['ipaddress'])
 			{
-				if(preg_match('#^[0-9]{1,3}\:[0-9]{1,3}\.[0-9]{1,3}\:[0-9]{1,3}$#', $input['ipaddress']))
+				if(preg_match('#^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$#', $input['ipaddress']))
 				{
-					$postip = array_map('intval', explode(':', $input['ipaddress']));
-					if(!($postip[0] > 255 || $postip[1] > 255 || $postip[2] > 255 || $postip[3] > 255))
+					$ipaddress = array_map('intval', explode('.', $input['ipaddress']));
+					if(!($ipaddress[0] > 255 || $ipaddress[1] > 255 || $ipaddress[2] > 255 || $ipaddress[3] > 255))
 					{
-						$p['ipaddress'] = implode(':', $postip);
-						$post_update_data['ipaddress'] = $db->escape_binary($p['ipaddress']);
+						$p['ipaddress'] = implode('.', $ipaddress);
+						$post_update_data['ipaddress'] = $db->escape_binary(my_inet_pton($p['ipaddress']));
 					}
 				}
 			}
@@ -429,21 +395,52 @@ if(use_xmlhttprequest == "1")
 
 				if(isset($update))
 				{
+					global $plugins;
+
 					$forum = get_forum($dh->data['fid']);
 					$thread = get_thread($dh->data['tid']);
 
-					$update_array = array(
-						'lastpost' => "'".TIME_NOW."'"
-					);
+					$user = get_user($dh->post_update_data['uid']);
 
+					$update_query = array();
+					if($thread['dateline'] > $user['lastpost'])
+					{
+						$update_query['lastpost'] = "'{$thread['dateline']}'";
+					}
 					if($forum['usepostcounts'])
 					{
-						$update_array['postnum'] = 'postnum+1';
-
-						$db->update_query('users', array('postnum' => 'postnum-1'), "uid='{$dh->data['uid']}'", 1, true);
+						$update_query['postnum'] = 'postnum+1';
+					}
+					if($forum['usethreadcounts'])
+					{
+						$update_query['threadnum'] = 'threadnum+1';
 					}
 
-					$db->update_query('users', $update_array, "uid='{$dh->post_update_data['uid']}'", 1, true);
+					if(!empty($update_query))
+					{
+						$db->update_query('users', $update_query, "uid='{$user['uid']}'", 1, true);
+					}
+
+					$user = get_user($dh->data['uid']);
+
+					$update_query = array();
+					if($thread['dateline'] < $user['lastpost'])
+					{
+						$update_query['lastpost'] = "'{$thread['dateline']}'";
+					}
+					if($forum['usepostcounts'])
+					{
+						$update_query['postnum'] = 'postnum-1';
+					}
+					if($forum['usethreadcounts'])
+					{
+						$update_query['threadnum'] = 'threadnum-1';
+					}
+
+					if(!empty($update_query))
+					{
+						$db->update_query('users', $update_query, "uid='{$user['uid']}'", 1, true);
+					}
 
 					if($thread['firstpost'] == $post['pid'])
 					{
@@ -454,48 +451,26 @@ if(use_xmlhttprequest == "1")
 						);
 
 						$db->update_query('threads', $thread_update, "tid='{$thread['tid']}'");
-
-						if($forum['usethreadcounts'])
-						{
-							$db->update_query('users', array('threadnum' => 'postnum-1'), "uid='{$dh->data['uid']}'", 1, true);
-							$db->update_query('users', array('threadnum' => 'postnum+1'), "uid='{$dh->post_update_data['uid']}'", 1, true);
-						}
 					}
 
-					update_last_post($thread['tid']);
-					update_forum_lastpost($forum['fid']);
+					$plugins->add_hook('datahandler_post_update_end', array($this, 'hook_datahandler_post_update_end'));
 				}
 
 				return;
 			}
 		}
 
-		$search_username = htmlspecialchars_uni(trim($p['username']));
-
-		// Note: dates are in GMT timezone
-		$starttime_time = gmdate('g:i a', $p['dateline']);
-		$startday = gmdate('j', $p['dateline']);
-		$startmonth = gmdate('m', $p['dateline']);
-		$startdateyear = gmdate('Y', $p['dateline']);
-
-		// Generate form elements
-		$startdateday = '';
-		for($day = 1; $day <= 31; ++$day)
-		{
-			$selected = $startday == $day ? ' selected="selected"' : '';
-			$startdateday .= eval($templates->render('modcp_announcements_day'));
-		}
-
-		$startmonthsel = array();
-		foreach(array('01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12') as $month)
-		{
-			$startmonthsel[$month] = '';
-		}
-		$startmonthsel[$startmonth] = ' selected="selected"';
-
-		$startdatemonth = eval($templates->render('modcp_announcements_month_start'));
-
 		$ougc_adminpostedit = eval($templates->render('ougcadminpostedit'));
+	}
+
+	// Hook: editpost_end/datahandler_post_update
+	function hook_datahandler_post_update_end(&$dh)
+	{
+		// pid
+		// uid
+		// edit_uid
+		update_last_post($dh->data['tid']);
+		update_forum_lastpost($dh->data['fid']);
 	}
 
 	// Hook: editpost_do_editpost_start
@@ -510,6 +485,9 @@ if(use_xmlhttprequest == "1")
 		}
 	}
 }
+
+//_dump(get_thread(9));
+//_dump(get_post(9));
 
 global $adminpostedit;
 
