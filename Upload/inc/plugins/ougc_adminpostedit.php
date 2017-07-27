@@ -434,7 +434,7 @@ if(use_xmlhttprequest == "1")
 					{
 						$update_query['postnum'] = 'postnum+1';
 					}
-					if($forum['usethreadcounts'])
+					if($forum['usethreadcounts'] && $thread['firstpost'] == $post['pid'])
 					{
 						$update_query['threadnum'] = 'threadnum+1';
 					}
@@ -455,7 +455,7 @@ if(use_xmlhttprequest == "1")
 					{
 						$update_query['postnum'] = 'postnum-1';
 					}
-					if($forum['usethreadcounts'])
+					if($forum['usethreadcounts'] && $thread['firstpost'] == $post['pid'])
 					{
 						$update_query['threadnum'] = 'threadnum-1';
 					}
