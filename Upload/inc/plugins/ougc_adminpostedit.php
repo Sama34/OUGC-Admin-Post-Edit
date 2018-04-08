@@ -465,14 +465,22 @@ if(use_xmlhttprequest == "1")
 						$db->update_query('users', $update_query, "uid='{$user['uid']}'", 1, true);
 					}
 
-					if($thread['firstpost'] == $post['pid'])
+					$thread_update = array();
+					if($dh->post_update_data['uid'])
 					{
-						$thread_update = array(
-							'uid'		=> $dh->post_update_data['uid'],
-							'username'	=> $dh->post_update_data['username'],
-							'dateline'	=> $dh->post_update_data['dateline']
-						);
+						$thread_update['uid'] = $dh->post_update_data['uid'];
+					}
+					if($dh->post_update_data['username'])
+					{
+						$thread_update['username'] = $dh->post_update_data['username'];
+					}
+					if($dh->post_update_data['dateline'])
+					{
+						$thread_update['dateline'] = $dh->post_update_data['dateline'];
+					}
 
+					if(!empty($thread_update) && $thread['firstpost'] == $post['pid'])
+					{
 						$db->update_query('threads', $thread_update, "tid='{$thread['tid']}'");
 					}
 
