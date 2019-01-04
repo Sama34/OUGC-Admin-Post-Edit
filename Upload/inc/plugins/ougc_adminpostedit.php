@@ -280,7 +280,7 @@ if(use_xmlhttprequest == "1")
 		$this->load_pluginlibrary();
 
 		// Delete settings
-		$PL->templates_delete('ougc_adminpostedit');
+		$PL->templates_delete('ougcadminpostedit');
 		$PL->settings_delete('ougc_adminpostedit');
 
 		// Delete version from cache
