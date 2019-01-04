@@ -537,7 +537,12 @@ if(use_xmlhttprequest == "1")
 	// Hook: editpost_do_editpost_start
 	function hook_editpost_do_editpost_start()
 	{
-		global $mybb;
+		global $mybb, $fid;
+
+		if(!is_moderator($fid, 'caneditposts') || !is_member($mybb->settings['ougc_adminpostedit_groups']))
+		{
+			return;
+		}
 
 		$input = $mybb->get_input('ougc_adminpostedit', MyBB::INPUT_ARRAY);
 
