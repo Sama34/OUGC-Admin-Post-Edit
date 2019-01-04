@@ -217,7 +217,8 @@ if(use_xmlhttprequest == "1")
 <td class="trow2"><input type="text" class="textbox" name="ougc_adminpostedit[ipaddress]" style="width: 8em;" value="{$p[\'ipaddress\']}" size="14" maxlength="16" /></td>
 </tr>
 <tr>
-<td class="trow2" colspan="2"><span class="smalltext"><label><input type="checkbox" class="checkbox" name="ougc_adminpostedit[silent]" value="1" {$p[\'silent\']} /> {$lang->ougc_adminpostedit_post_silentedit}</label></span>
+<td class="trow2" colspan="2"><span class="smalltext"><label><input type="checkbox" class="checkbox" name="ougc_adminpostedit[silent]" value="1" {$p[\'silent\']} /> {$lang->ougc_adminpostedit_post_silentedit}</label><br />
+<label><input type="checkbox" class="checkbox" name="ougc_adminpostedit[reset]" value="1" {$p[\'reset\']} /> {$lang->ougc_adminpostedit_post_resetedit}</label></span>
 </td>
 </tr>',
 		));
@@ -359,11 +360,12 @@ if(use_xmlhttprequest == "1")
 		$post = get_post($pid);
 
 		$p = array(
-			'dateline'		=> $post['dateline'],
-			'uid'			=> $post['uid'],
-			'username'		=> $post['username'],
-			'ipaddress'		=> my_inet_ntop($db->unescape_binary($post['ipaddress'])),
-			'silent'		=> ''
+			'dateline'	=> $post['dateline'],
+			'uid'		=> $post['uid'],
+			'username'	=> $post['username'],
+			'ipaddress'	=> my_inet_ntop($db->unescape_binary($post['ipaddress'])),
+			'silent'	=> '',
+			'reset'		=> ''
 		);
 
 		$timestamp = (int)$p['dateline'];
@@ -418,6 +420,13 @@ if(use_xmlhttprequest == "1")
 			if(!empty($input['silent']))
 			{
 				$p['silent'] = ' checked="checked"';
+			}
+
+			if(!empty($input['reset']))
+			{
+				$p['reset'] = ' checked="checked"';
+
+				$post_update_data['edituid'] = $post_update_data['edittime'] = 0;
 			}
 
 			if($dh instanceof PostDataHandler)

@@ -37,3 +37,4 @@ $l['ougc_adminpostedit_post_time'] = 'Time:';
 $l['ougc_adminpostedit_post_author'] = 'Post Author:';
 $l['ougc_adminpostedit_post_ip'] = 'Post IP:';
 $l['ougc_adminpostedit_post_silentedit'] = 'Do not update this post <i>edited by</i> message.';
+$l['ougc_adminpostedit_post_resetedit'] = 'Reset the post <i>edited by</i> message.';
