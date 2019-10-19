@@ -34,7 +34,7 @@ defined('IN_MYBB') or die('Direct initialization of this file is not allowed.');
 defined('PLUGINLIBRARY') or define('PLUGINLIBRARY', MYBB_ROOT.'inc/plugins/pluginlibrary.php');
 
 // Cache template
-if(THIS_SCRIPT == 'editpost.php')
+if(defined('THIS_SCRIPT') && THIS_SCRIPT == 'editpost.php')
 {
 	global $templatelist;
 
