@@ -4,9 +4,9 @@
  *
  *	OUGC Admin Post Edit plugin (/inc/plugins/ougc_adminpostedit.php)
  *	Author: Omar Gonzalez
- *	Copyright: © 2015 - 2019 Omar Gonzalez
+ *	Copyright: © 2015 - 2020 Omar Gonzalez
  *
- *	Website: http://omarg.me
+ *	Website: https://ougc.network
  *
  *	Allows administrators to edit additional post data.
  *
@@ -122,15 +122,15 @@ class OUGC_AdminPostEdit
 		$this->load_language();
 
 		return array(
-			'name'					=> 'OUGC Admin Post Edit',
-			'description'			=> $lang->setting_group_ougc_adminpostedit_desc,
-			'website'				=> 'https://omarg.me/thread?public/plugins/ougc-admin-post-edit',
-			'author'				=> 'Omar G.',
-			'authorsite'			=> 'http://omarg.me',
-			'version'				=> '1.8.19',
-			'versioncode'			=> 1819,
-			'compatibility'			=> '18*',
-			'codename'				=> 'ougc_adminpostedit',
+			'name'			=> 'OUGC Admin Post Edit',
+			'description'	=> $lang->setting_group_ougc_adminpostedit_desc,
+			'website'		=> 'https://ougc.network',
+			'author'		=> 'Omar G.',
+			'authorsite'	=> 'https://ougc.network',
+			'version'		=> '1.8.22',
+			'versioncode'	=> 1822,
+			'compatibility'	=> '18*',
+			'codename'		=> 'ougc_adminpostedit',
 			'pl'			=> array(
 				'version'	=> 13,
 				'url'		=> 'https://community.mybb.com/mods.php?action=view&pid=573'
@@ -218,7 +218,8 @@ if(use_xmlhttprequest == "1")
 </tr>
 <tr>
 <td class="trow2" colspan="2"><span class="smalltext"><label><input type="checkbox" class="checkbox" name="ougc_adminpostedit[silent]" value="1" {$p[\'silent\']} /> {$lang->ougc_adminpostedit_post_silentedit}</label><br />
-<label><input type="checkbox" class="checkbox" name="ougc_adminpostedit[reset]" value="1" {$p[\'reset\']} /> {$lang->ougc_adminpostedit_post_resetedit}</label></span>
+<label><input type="checkbox" class="checkbox" name="ougc_adminpostedit[reset]" value="1" {$p[\'reset\']} /> {$lang->ougc_adminpostedit_post_resetedit}</label><br />
+<label><input type="checkbox" class="checkbox" name="ougc_adminpostedit[forceusername]" value="1" {$p[\'forceusername\']} /> {$lang->ougc_adminpostedit_post_forceusername}</label></span>
 </td>
 </tr>',
 		));
@@ -365,7 +366,8 @@ if(use_xmlhttprequest == "1")
 			'username'	=> $post['username'],
 			'ipaddress'	=> my_inet_ntop($db->unescape_binary($post['ipaddress'])),
 			'silent'	=> '',
-			'reset'		=> ''
+			'reset'		=> '',
+			'forceusername'	=> ''
 		);
 
 		$timestamp = (int)$p['dateline'];
@@ -375,6 +377,7 @@ if(use_xmlhttprequest == "1")
 		if($mybb->request_method == 'post')
 		{
 			$input = $mybb->get_input('ougc_adminpostedit', MyBB::INPUT_ARRAY);
+			$input['username'] = trim($input['username']);
 
 			$post_update_data = array();
 
@@ -390,11 +393,18 @@ if(use_xmlhttprequest == "1")
 				}
 			}
 
-			$search_username = htmlspecialchars_uni(trim($input['username']));
+			$search_username = htmlspecialchars_uni($input['username']);
 
-			if(!empty($input['username']) && trim($input['username']) && $p['username'] != $input['username'])
+			if(!empty($input['username'])/* && $p['username'] != $input['username']*/)
 			{
-				if($user = get_user_by_username($input['username'], array('fields' => array('username'))))
+				$user = get_user_by_username($input['username'], array('fields' => array('username')));
+
+				$user['uid'] = (int)$user['uid'];
+				$user['username'] = !empty($user['username']) ? $user['username'] : $input['username'];
+
+				$change_user = !empty($user['uid']) ? $user['uid'] != $p['uid'] : !empty($input['forceusername']);
+
+				if($change_user)
 				{
 					$p['uid'] = $post_update_data['uid'] = (int)$user['uid'];
 					$p['username'] = $user['username'];
@@ -427,6 +437,11 @@ if(use_xmlhttprequest == "1")
 				$p['reset'] = ' checked="checked"';
 
 				$post_update_data['edituid'] = $post_update_data['edittime'] = 0;
+			}
+
+			if(!empty($input['forceusername']))
+			{
+				$p['forceusername'] = ' checked="checked"';
 			}
 
 			if($dh instanceof PostDataHandler)

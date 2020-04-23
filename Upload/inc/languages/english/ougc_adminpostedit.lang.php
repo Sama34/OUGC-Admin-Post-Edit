@@ -4,9 +4,9 @@
  *
  *	OUGC Admin Post Edit plugin (/inc/languages/english/ougc_adminpostedit.lang.php)
  *	Author: Omar Gonzalez
- *	Copyright: © 2015 - 2019 Omar Gonzalez
+ *	Copyright: © 2015 - 2020 Omar Gonzalez
  *
- *	Website: http://omarg.me
+ *	Website: https://ougc.network
  *
  *	Allows administrators to edit additional post data.
  *
@@ -38,3 +38,4 @@ $l['ougc_adminpostedit_post_author'] = 'Post Author:';
 $l['ougc_adminpostedit_post_ip'] = 'Post IP:';
 $l['ougc_adminpostedit_post_silentedit'] = 'Do not update this post <i>edited by</i> message.';
 $l['ougc_adminpostedit_post_resetedit'] = 'Reset the post <i>edited by</i> message.';
+$l['ougc_adminpostedit_post_forceusername'] = 'If username doesn\'t exists force it and set the author as guest.';
